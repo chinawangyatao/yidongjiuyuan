@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { showFailToast, showLoadingToast } from 'vant'
 import { getInfo, upDataImg, updataStatus } from '@/api/count'
@@ -36,38 +35,28 @@ const beforeRead = (file: any) => {
   }
 }
 const getServeImg = async (file: any) => {
-
-  const params = new FormData()
-  params.append('file', file)
-  params.append('source', '2')
-  // const res = await upDataImg(params)
   const toast = showLoadingToast({
     duration: 0, // 持续展示 toast
     forbidClick: true,
     message: '加载中...',
   })
+  const params = new FormData()
+  params.append('file', file)
+  params.append('source', '2')
+  // const res = await upDataImg(params)
   // 这里直接调取App后台接口
-  fetch('http://124.129.136.5:29191/smartroad/forpublic/uploadImg', {
+  fetch('http://140.249.206.14:8788/smartroad/forpublic/uploadImg', {
     method: 'POST',
     body: params,
   }).then(res => res.json()).then((data) => {
     window.console.log(data)
     imgObj.value = data.data
     window.console.log(imgObj.value)
+    // alert(data.data)
     toast.close() // 清除加载效果
   }).catch((err) => {
     showFailToast('图片上传失败', err)
   })
-  // const toast = showLoadingToast({
-  //   duration: 0, // 持续展示 toast
-  //   forbidClick: true,
-  //   message: '加载中...',
-  // })
-  // const params = new FormData()
-  // params.append('file', file)
-  // params.append('source', '2')
-  // // const res = await upDataImg(params)
-
   // toast.close() // 清除加载效果
   // if (res.code !== 200) {
   //   showFailToast('图片上传失败')
@@ -77,20 +66,22 @@ const getServeImg = async (file: any) => {
   // imgObj.value = JSON.parse(res.data)
 }
 const afterRead = (file: any) => {
-  // compressImage(file.content).then((result) => {
-  //   window.console.log('压缩后的结果', result) // result即为压缩后的结果
-  //   window.console.log('压缩前大小', file.file.size)
-  //   window.console.log('压缩后大小', result.size)
-  //   if (result.size > file.file.size) {
-  //     window.console.log('上传原图')
-  //     // 压缩后比原来更大，则将原图上传
-  //     getServeImg(file.file)
-  //   } else {
-  //     // 压缩后比原来小，上传压缩后的
-  //     window.console.log('上传压缩图')
-  //     getServeImg(result)
-  //   }
-  // })
+  // 不转base64，直接上传
+  // getServeImg(file.file)
+  compressImage(file.content).then((result) => {
+    window.console.log('压缩后的结果', result) // result即为压缩后的结果
+    window.console.log('压缩前大小', file.file.size)
+    window.console.log('压缩后大小', result.size)
+    if (result.size > file.file.size) {
+      window.console.log('上传原图')
+      // 压缩后比原来更大，则将原图上传
+      getServeImg(file.file)
+    } else {
+      // 压缩后比原来小，上传压缩后的
+      window.console.log('上传压缩图')
+      getServeImg(result)
+    }
+  })
   if (Array.isArray(file) && file.length) {
     file.forEach((item) => {
       uploadImage.value.push(item.file)
@@ -138,7 +129,7 @@ const uploadFile = async () => {
         message: '接口异常',
       })
     }
-  }else {
+  } else {
     window.console.log(imgObj.value.id)
   }
 }

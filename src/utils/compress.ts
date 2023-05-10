@@ -1,3 +1,4 @@
+// base64转blob
 export function convertBase64UrlToBlob(urlData: any) {
   const arr = urlData.split(',')
   const mime = arr[0].match(/:(.*?);/)[1]
@@ -7,6 +8,23 @@ export function convertBase64UrlToBlob(urlData: any) {
   while (n--)
     u8arr[n] = bstr.charCodeAt(n)
   return new Blob([u8arr], { type: mime })
+}
+
+// base64转file
+function base64ToImageFile(base64) {
+  // 将base64字符串转换为Blob对象
+  const byteCharacters = atob(base64.split(',')[1])
+  const byteArrays = []
+  for (let i = 0; i < byteCharacters.length; i++)
+    byteArrays.push(byteCharacters.charCodeAt(i))
+
+  const blob = new Blob([new Uint8Array(byteArrays)], { type: 'image/jpeg' })
+
+  // 将Blob对象转换为File对象
+  const fileName = 'image.jpg' // 可以根据实际情况设置文件名
+  const file = new File([blob], fileName, { type: 'image/jpeg' })
+
+  return file
 }
 
 export function compressImage(path: any) {
@@ -52,9 +70,11 @@ export function compressImage(path: any) {
       context.clearRect(0, 0, compressedWidth, compressedHeight)
       context.drawImage(img, 0, 0, compressedWidth, compressedHeight)
       const base64 = canvas.toDataURL('image/*', 0.8)
-      // const blob = convertBase64UrlToBlob(base64)
+      const blob = convertBase64UrlToBlob(base64)
+      const imageAssets = base64ToImageFile(base64)
       // 回调函数返回blob的值。也可根据自己的需求返回base64的值
-      resolve(base64)
+      resolve(imageAssets)
     }
   })
 }
+

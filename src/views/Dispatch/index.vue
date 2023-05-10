@@ -8,6 +8,7 @@ const router = useRouter();
 const id = route.query.id;
 const userId = localStorage.get("userId");
 const position = localStorage.get("position");
+
 const dataInfo = reactive({
   data: {
     empRescuedVehicle: {
@@ -87,7 +88,7 @@ const formData = reactive({
   groupname: "",
   phone_number: "",
   user_name: "",
-  groupid: "734",
+  groupid: "624",
   plate: "",
   plateLabe: "鲁"
 });
@@ -99,8 +100,8 @@ const showPicker = ref(false);
 // 班组列表
 const columns = ref([]);
 const getColumns = async () => {
-  // const res = await getTeam(userId._value)
-  const res = await getTeam(733);
+  const res = await getTeam(userId._value)
+  // const res = await getTeam(624);
   if (res.code === 200) {
     columns.value = res.data.map(item => {
       return {
@@ -116,8 +117,8 @@ const showPickerGroup = ref<boolean>(false);
 // 方案组列表
 const columnsGroup = ref<[]>([]);
 const getColumnsGroup = async () => {
-  // const res = await getGroup(userId._value)
-  const res = await getGroup(733);
+  const res = await getGroup(userId._value)
+  // const res = await getGroup(624);
   if (res.code === 200) {
     columnsGroup.value = res.data.map(item => {
       return {
@@ -153,6 +154,7 @@ const getData = async params => {
 };
 getData(id);
 const onSubmit = async () => {
+  window.console.log(id)
   const toast = showLoadingToast({
     duration: 0, // 持续展示 toast
     forbidClick: true,
@@ -166,6 +168,7 @@ const onSubmit = async () => {
     end_status: "0",
     rescue_source: "1",
     assignid: userId._value,
+    // assignid: "624",
     rescue_vehicles: [
       {
         groupname,

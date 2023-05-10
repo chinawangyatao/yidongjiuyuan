@@ -97,8 +97,8 @@ const showPicker = ref(false);
 // 班组列表
 const columns = ref([]);
 const getColumns = async () => {
-  // const res = await getTeam(userId._value)
-  const res = await getTeam(733);
+  const res = await getTeam(userId._value)
+  // const res = await getTeam(733);
   if (res.code === 200) {
     columns.value = res.data.map(item => {
       return {
@@ -148,8 +148,8 @@ const onSubmit = async () => {
       driverName: user_name,
       phoneNumber: phone_number,
       plate: `${plateLabe}${plate}`,
-      createdBy: 733
-      // createdBy: userId._value
+      // createdBy: 733
+      createdBy: userId._value
     }
     const res = await addGroup(obj)
     toast.close(); // 清除加载效果

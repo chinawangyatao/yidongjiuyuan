@@ -13,8 +13,8 @@ const active = ref(1)
 const getDepartments = async () => {
   isLoading.value = true
   const obj = {
-    userid: 733,
-    // userid: userId.value,
+    // userid: 624,
+    userid: userId.value,
     oldOrNew: active.value,
   }
   const res = await getList(obj)
@@ -44,7 +44,7 @@ const timingPositioningUpload = () => {
       timeout: 2, // 高德定位超时时间默认最小2秒，时间越长越准
       needGeocode: true, // 是否需要逆地理编码(位置名称) 不需要可以自行解析
       // ios_googleMap_key: 'cbb4f7fee06898a9f4b6e832972f347e',// old
-      ios_googleMap_key: '7046844086a225d684c2a758775219db',// new
+      ios_googleMap_key: '7046844086a225d684c2a758775219db', // new
       // 此处传递的key的优先级高
       // and_googleMap_key: 'cbb4f7fee06898a9f4b6e832972f347e',
       and_googleMap_key: '7046844086a225d684c2a758775219db',
@@ -130,10 +130,14 @@ onUnmounted(() => {
         <van-tab title="历史数据" />
         <van-tab title="最新数据" />
       </van-tabs>
-      <van-pull-refresh v-if="listData.length > 0" v-model="isLoading"
-        :style="ruleType === '1' ? 'height: calc(100% - 50px)' : ''" @refresh="getDepartments">
-        <ListCard v-for="(item, index) in listData" :key="index" :form-data="item"
-          :is-btn="active === 1 && ruleType !== '0'" @click="goInfo(item)" @load="getDepartments" />
+      <van-pull-refresh
+        v-if="listData.length > 0" v-model="isLoading"
+        :style="ruleType === '1' ? 'height: calc(100% - 50px)' : ''" @refresh="getDepartments"
+      >
+        <ListCard
+          v-for="(item, index) in listData" :key="index" :form-data="item"
+          :is-btn="active === 1 && ruleType !== '0'" @click="goInfo(item)" @load="getDepartments"
+        />
       </van-pull-refresh>
       <van-empty v-else description="暂无内容" />
     </TopMenu>
