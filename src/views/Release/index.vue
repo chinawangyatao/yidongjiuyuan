@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { showConfirmDialog, showFailToast, showLoadingToast } from 'vant'
+import { showConfirmDialog, showFailToast, showLoadingToast,showDialog } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { getInfo, upDataImg, updataStatus } from '@/api/count'
 import { compressImage } from '@/utils/compress'
@@ -103,6 +103,14 @@ const deleteImg = (file: any) => {
 }
 
 const uploadFile = async () => {
+  if (countMoney.value === '') {
+    await showDialog({
+      title: '提示',
+      message:
+        '金额不能为空',
+      theme: 'round-button',
+    })
+  }
   if (uploadImage.value && uploadImage.value.length) {
     const toast = showLoadingToast({
       duration: 0, // 持续展示 toast
@@ -169,6 +177,7 @@ onMounted(() => {
           <van-cell-group inset>
             <van-field
               v-model="countMoney"
+              required
               type="number"
               name="金额"
               label="金额："
@@ -188,16 +197,7 @@ onMounted(() => {
         type="primary"
         native-type="submit"
 
-        @click="show ? showConfirmDialog({
-          title: '提示',
-          message:
-            '你确定提交？',
-        })
-          .then(() => {
-            // on confirm
-            uploadFile()
-          }) : uploadFile()
-        "
+        @click="uploadFile()"
       >
         上传
       </van-button>

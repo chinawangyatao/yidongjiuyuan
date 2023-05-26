@@ -18,7 +18,7 @@ const getDepartments = async (value) => {
   isLoading.value = true
   const obj = {
     stake: value, // 搜索参数
-    // userid: 735,//改这里
+    // userid: 733, // 改这里
     userid: userId.value,
     oldOrNew: active.value,
   }
@@ -36,7 +36,7 @@ const getDepartments = async (value) => {
     localStorage.set('ruleType', ruleType.value)
   }
   // 清空搜索框
-  valueKeywords.value = ""
+  valueKeywords.value = ''
   // show.value = false
   toast.close()
 }
@@ -148,7 +148,7 @@ onUnmounted(() => {
       <van-tab title="历史数据" />
       <van-tab title="最新数据" />
     </van-tabs>
-    <van-search  v-model="valueKeywords" placeholder="请输入桩号（仅数字）" shape="round" inputmode="numeric" @search="searchInfo" />
+    <van-search v-model="valueKeywords" placeholder="请输入桩号（仅数字）" shape="round" inputmode="numeric" @search="searchInfo" />
     <van-pull-refresh
       v-if="listData.length > 0" v-model="isLoading"
       :style="ruleType === '1' ? 'height: calc(100% - 50px)' : ''" @refresh="getDepartments"
