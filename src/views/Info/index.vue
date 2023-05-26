@@ -71,7 +71,7 @@ const btnName = (query) => {
     case '6':
       return '到达'
     case '7':
-      return '完成'
+      return '拖离'
   }
 }
 const cancelName = (query) => {
@@ -122,38 +122,42 @@ const onSubmit = async () => {
 
 <template>
   <div class="container">
-    <TopMenu>
-      <ListCard :is-btn="false" :is-navigation="true" :form-data="dataInfo.data" />
-      <div class="info-detail">
-        <h4>现场描述</h4>
-        <p v-if="dataInfo.data.empEvnRescue?.description">
-          {{ dataInfo.data.empEvnRescue.description }}
-        </p>
-        <van-divider />
-        <van-image
-          v-if="dataInfo.data.empRescuedVehicle?.pic_path"
-          width="80"
-          height="80"
-          fit="cover"
-          :src="dataInfo.data.empRescuedVehicle.pic_path"
-          @click="showImage = true"
-        />
-      </div>
-      <div class="info-detail">
-        <van-cell v-if="dataInfo.data.empEvnRescue?.reasonname" :border="false" title="救援类型" :value="dataInfo.data.empEvnRescue.reasonname" />
-        <van-cell v-if="dataInfo.data.empRescuedVehicle?.vehicle_type" :border="false" title="救援车辆类型" :value="dataInfo.data.empRescuedVehicle.vehicle_name" />
-      </div>
-      <div style="height: 60px" />
-      <!-- 权限改了又改 -->
-      <div v-if="dataInfo.data.empEvnRescue?.status !== '8' && ((ruleType === '1' && dataInfo.data.empEvnRescue?.status === '4') || ruleType === '2')" class="flower-btn">
-        <van-button v-if="dataInfo.data.empEvnRescue?.status" type="primary" style="flex: 1; margin-left: 0;" @click.stop="operation">
-          {{ btnName(dataInfo.data.empEvnRescue.status) }}
-        </van-button>
-        <van-button v-if="dataInfo.data.empEvnRescue?.status" type="default" style="flex: 1; margin-left: 20px;" @click.stop="cancelData">
-          {{ cancelName(dataInfo.data.empEvnRescue.status) }}
-        </van-button>
-      </div>
-    </TopMenu>
+    <!--    <TopMenu>   </TopMenu> -->
+    <ListCard :is-btn="false" :is-navigation="true" :form-data="dataInfo.data" />
+    <div class="info-detail">
+      <h4>现场描述</h4>
+      <p v-if="dataInfo.data.empEvnRescue?.description">
+        {{ dataInfo.data.empEvnRescue.description }}
+      </p>
+      <van-divider />
+      <van-image
+        v-if="dataInfo.data.empRescuedVehicle?.pic_path"
+        width="80"
+        height="80"
+        fit="cover"
+        :src="dataInfo.data.empRescuedVehicle.pic_path"
+        @click="showImage = true"
+      />
+    </div>
+    <div class="info-detail">
+      <van-cell  v-if="dataInfo.data.empEvnRescue?.charged" :border="false" title="救援金额" :value="`${dataInfo.data.empEvnRescue.charged} 元`" value-class="chargedClass" />
+    </div>
+    <div class="info-detail">
+      <van-cell v-if="dataInfo.data.empEvnRescue?.reasonname" :border="false" title="救援类型" :value="dataInfo.data.empEvnRescue.reasonname" />
+      <van-cell v-if="dataInfo.data.empRescuedVehicle?.vehicle_type" :border="false" title="救援车辆类型" :value="dataInfo.data.empRescuedVehicle.vehicle_name" />
+    </div>
+
+    <div style="height: 60px" />
+    <!-- 权限改了又改 -->
+    <div v-if="dataInfo.data.empEvnRescue?.status !== '8' && ((ruleType === '1' && dataInfo.data.empEvnRescue?.status === '4') || ruleType === '2')" class="flower-btn">
+      <van-button v-if="dataInfo.data.empEvnRescue?.status" type="primary" style="flex: 1; margin-left: 0;" @click.stop="operation">
+        {{ btnName(dataInfo.data.empEvnRescue.status) }}
+      </van-button>
+      <van-button v-if="dataInfo.data.empEvnRescue?.status" type="default" style="flex: 1; margin-left: 20px;" @click.stop="cancelData">
+        {{ cancelName(dataInfo.data.empEvnRescue.status) }}
+      </van-button>
+    </div>
+
     <van-dialog
       v-model:show="show"
       :confirm-button-disabled="true"
@@ -224,10 +228,19 @@ const onSubmit = async () => {
     padding: 10px;
     background-color: #fff;
     border-radius: 7px;
-
+    .chargedClass{
+        font-weight: bold !important;
+        color: #2b2d42 !important;
+    }
     h4 {
       margin: 10px 0;
     }
+  }
+}
+:deep(.chargedClass){
+  span{
+    font-weight: bold !important;
+    color: #2d2d2d !important;
   }
 }
 </style>

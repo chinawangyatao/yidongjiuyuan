@@ -61,7 +61,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       viteVConsole({
         entry: [path.resolve('src/main.ts')],
         localEnabled: command === 'serve',
-        enabled: false,
+        enabled: true,// 设置为 true 以在打包后的文件中保留 VConsole
         config: {
           maxLogNumber: 1000,
           theme: 'light',

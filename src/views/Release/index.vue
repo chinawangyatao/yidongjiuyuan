@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { showConfirmDialog, showFailToast, showLoadingToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
-import { showFailToast, showLoadingToast } from 'vant'
 import { getInfo, upDataImg, updataStatus } from '@/api/count'
 import { compressImage } from '@/utils/compress'
+const countMoney = ref('')
+const show = ref(false)
 const uploadImage = ref([])
 const fileList = ref([])
+const messageInfo = ref('上传定位信息')
 let dataInfo = reactive({
   empEvnRescue: {
     status: '',
@@ -98,6 +101,7 @@ const deleteImg = (file: any) => {
     }
   }
 }
+
 const uploadFile = async () => {
   if (uploadImage.value && uploadImage.value.length) {
     const toast = showLoadingToast({
@@ -107,6 +111,7 @@ const uploadFile = async () => {
     })
     const { status, id } = dataInfo.empEvnRescue
     const picid_list = dataInfo.empRescuedVehicle?.picid_list
+    const countMoneyFloat = parseFloat((+countMoney.value).toFixed(2))
     const row = parseInt(status) + 1
     const sendStatus = {
       id,
@@ -117,6 +122,7 @@ const uploadFile = async () => {
           picidList: `${picid_list ? `${picid_list},` : ''}${imgObj.value.id}`,
         },
       ],
+      charged: countMoneyFloat,
     }
     const obj = await updataStatus(sendStatus)
     toast.close() // 清除加载效果
@@ -135,9 +141,17 @@ const uploadFile = async () => {
 }
 const getData = async (params) => {
   const res = await getInfo(params)
-  if (res.code === 200)
+  if (res.code === 200) {
     dataInfo = res.data
+    if (res.data.empEvnRescue.status === '8') {
+      show.value = true
+      messageInfo.value = '上传收费凭证'
+    } else {
+      messageInfo.value = '上传定位信息'
+    }
+  }
 }
+// 确认弹窗
 onMounted(() => {
   const id = route.query.id
   getData(id)
@@ -146,24 +160,48 @@ onMounted(() => {
 
 <template>
   <div class="container">
-    <TopMenu :is-back="true" menu-title="上传信息">
-      <van-notice-bar :scrollable="false" text="系统已自动获取到您的定位" />
-      <div class="workOut_0">
-        <div>
-          <div><span class="workOut_01">上传定位信息</span></div>
-          <van-uploader v-model="fileList" :before-read="beforeRead" :after-read="afterRead" :delete="deleteImg" multiple :max-count="1" />
-        </div>
-        <van-button
-          round
-          block
-          type="primary"
-          native-type="submit"
-          @click="uploadFile()"
-        >
-          上传
-        </van-button>
+    <!--    <TopMenu :is-back="true" menu-title="上传信息">    </TopMenu> -->
+    <van-notice-bar :scrollable="false" text="系统已自动获取到您的定位" />
+    <div class="workOut_0">
+      <div v-if="show" class="workOut_0_1">
+        <div><span class="workOut_01">上传收费金额</span></div>
+        <van-form>
+          <van-cell-group inset>
+            <van-field
+              v-model="countMoney"
+              type="number"
+              name="金额"
+              label="金额："
+              placeholder="请输入金额"
+              :rules="[{ required: true, message: '请填写金额' }]"
+            />
+          </van-cell-group>
+        </van-form>
       </div>
-    </TopMenu>
+      <div>
+        <div><span class="workOut_01">{{ messageInfo }}</span></div>
+        <van-uploader v-model="fileList" :before-read="beforeRead" :after-read="afterRead" :delete="deleteImg" multiple :max-count="1" />
+      </div>
+      <van-button
+        round
+        block
+        type="primary"
+        native-type="submit"
+
+        @click="show ? showConfirmDialog({
+          title: '提示',
+          message:
+            '你确定提交？',
+        })
+          .then(() => {
+            // on confirm
+            uploadFile()
+          }) : uploadFile()
+        "
+      >
+        上传
+      </van-button>
+    </div>
   </div>
 </template>
 
@@ -172,11 +210,14 @@ onMounted(() => {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background-color: #fff;
+  background-color: #ffffff;
 
   .workOut_0 {
     margin: 25px 12px;
     font-size: 16px;
+    .workOut_0_1{
+      margin: 5px 0px;
+    }
   }
   .workOut_01 {
     color: #333333;
@@ -196,6 +237,9 @@ onMounted(() => {
   }
   :deep(.van-button--info) {
     background: linear-gradient(-15deg, #4287de, #5ab2f5);
+  }
+  .van-cell{
+    align-items: center;
   }
 }
 </style>

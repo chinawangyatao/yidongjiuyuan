@@ -39,6 +39,16 @@ const operation = async (query: any) => {
     })
     return
   }
+  if (props.formData.empEvnRescue.status === '8') {
+    router.push({
+      name: 'Release',
+      query: {
+        id: query,
+      },
+    })
+    console.log('zouzhekli')
+    return
+  }
   router.push({
     name: 'Release',
     query: {
@@ -48,6 +58,8 @@ const operation = async (query: any) => {
 }
 const content = ref('')
 const show = ref(false)
+const countMoney = ref(0)
+const statusMeony = ref(0)
 // 取消及空使弹窗处理
 const cancelData = () => {
   show.value = true
@@ -77,7 +89,12 @@ const onSubmit = async () => {
     })
   }
 }
-
+// let countMoneyFloat = parseFloat((+countMoney.value).toFixed(2))
+// 确认提交金额
+const onSubmitMoeny = () => {
+  statusMeony.value = 9
+  onSubmit()
+}
 const navPosition = (data: any) => {
   const { geometry } = data
   if (geometry)
@@ -107,19 +124,27 @@ const labelColor = computed(() => {
 })
 const statusName = computed(() => {
   const query = props.formData.empEvnRescue.status
-  switch (query) {
-    case '3':
-      return '待接收'
-    case '4':
-      return '待派车'
-    case '5':
-      return '待发车'
-    case '6':
-      return '待到达'
-    case '7':
-      return '待完成'
-    case '8':
-      return '已完成'
+  if (props.formData.empEvnRescue?.end_status === '0') {
+    switch (query) {
+      case '3':
+        return '待接收'
+      case '4':
+        return '待派车'
+      case '5':
+        return '待发车'
+      case '6':
+        return '待到达'
+      case '7':
+        return '待拖离'
+      case '8':
+        return '已拖离'
+      case '9':
+        return '已完成'
+    }
+  } else if (props.formData.empEvnRescue?.end_status === '1') {
+    return '取消'
+  } else if (props.formData.empEvnRescue?.end_status === '2') {
+    return '空驶'
   }
 })
 const btnName = computed(() => {
@@ -134,7 +159,9 @@ const btnName = computed(() => {
     case '6':
       return '到达'
     case '7':
-      return '完成'
+      return '拖离'
+    case '8':
+      return '确认'
   }
 })
 const cancelName = computed(() => {
@@ -154,7 +181,7 @@ const cancelName = computed(() => {
 
 <template>
   <div>
-    <div v-if="props.formData.empEvnRescue?.end_status === '0'" class="card-box">
+    <div v-if="props.formData.empEvnRescue?.end_status === '0' || props.formData.empEvnRescue?.end_status === '1' || props.formData.empEvnRescue?.end_status === '2'" class="card-box">
       <div class="card-label">
         NO.{{ formData.empEvnRescue.evn_num }}
         <div class="label" :style="`background: ${labelColor}`">
@@ -167,23 +194,31 @@ const cancelName = computed(() => {
           {{ formData.empEvnRescue.splicingname }}
         </div>
         <div v-show="isNavigation" class="nav" @click.stop="navPosition(props.formData.empEvnRescue)">
-          <img class="label_2" referrerpolicy="no-referrer"
-            src="https://lanhu.oss-cn-beijing.aliyuncs.com/psivxiecqublphl8lj3mtxj47koqquq0cqg5223e2fe-15b9-460c-b88f-ead65aab98b4">
+          <img
+            class="label_2" referrerpolicy="no-referrer"
+            src="https://lanhu.oss-cn-beijing.aliyuncs.com/psivxiecqublphl8lj3mtxj47koqquq0cqg5223e2fe-15b9-460c-b88f-ead65aab98b4"
+          >
         </div>
       </div>
       <div v-if="props.formData.empEvnRescue.status !== '3' && props.formData.empRescuedVehicle" class="card-detail">
         <div>车牌号： {{ props.formData.empRescuedVehicle.plate || '' }} </div>
-        <div>被救人员： {{ `${props.formData.empRescuedVehicle.user_name || ''}
-                  ${props.formData.empRescuedVehicle.phone_number}` }} </div>
+        <div>
+          被救人员： {{ `${props.formData.empRescuedVehicle.user_name || ''}
+                  ${props.formData.empRescuedVehicle.phone_number || ''}` }}
+        </div>
         <div class="img" @click.stop="makePhone(props.formData.empRescuedVehicle.phone_number)">
-          <img referrerpolicy="no-referrer"
-            src="https://lanhu.oss-cn-beijing.aliyuncs.com/psc9r16z0uk3n8y7ddf2m0d6qqmxn46vlnq0369ca67-fa32-42dc-957a-ea4f2b5e02d9">
+          <img
+            referrerpolicy="no-referrer"
+            src="https://lanhu.oss-cn-beijing.aliyuncs.com/psc9r16z0uk3n8y7ddf2m0d6qqmxn46vlnq0369ca67-fa32-42dc-957a-ea4f2b5e02d9"
+          >
         </div>
       </div>
       <div class="card-btn">
-        <div>
-          <van-button v-if="props.isBtn && btnName" type="primary"
-            @click.stop="operation(props.formData.empEvnRescue.id)">
+        <div v-if="!(props.formData.empEvnRescue?.end_status === '1' || props.formData.empEvnRescue?.end_status === '2')">
+          <van-button
+            v-if="props.isBtn && btnName" type="primary"
+            @click.stop="operation(props.formData.empEvnRescue.id)"
+          >
             {{ btnName }}
           </van-button>
           <van-button v-if="props.isBtn && cancelName" type="default" @click.stop="show = true">
@@ -194,11 +229,15 @@ const cancelName = computed(() => {
       </div>
     </div>
     <!-- 添加阻止穿透效果 -->
-    <van-dialog v-model:show="show" :confirm-button-disabled="true" :cancel-button-disabled="true"
-      @click.stop="() => { return }" @touchmove.stop.prevent="() => { return }">
+    <van-dialog
+      v-model:show="show" :confirm-button-disabled="true" :cancel-button-disabled="true"
+      @click.stop="() => { return }" @touchmove.stop.prevent="() => { return }"
+    >
       <van-form @submit="onSubmit">
-        <van-field v-model="content" type="textarea" label-align="top" :label="`${cancelName}理由`" rows="3" :border="true"
-          :placeholder="`请输入${cancelName}理由`" :rules="[{ required: true, message: `${cancelName}理由必填` }]" />
+        <van-field
+          v-model="content" type="textarea" label-align="top" :label="`${cancelName}理由`" rows="3" :border="true"
+          :placeholder="`请输入${cancelName}理由`" :rules="[{ required: true, message: `${cancelName}理由必填` }]"
+        />
         <div class="form-btn">
           <van-button type="primary" native-type="submit">
             提交
@@ -362,5 +401,8 @@ const cancelName = computed(() => {
       color: #999999;
     }
   }
+}
+.van-cell{
+  align-items: center ;
 }
 </style>

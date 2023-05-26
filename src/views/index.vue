@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { showLoadingToast } from 'vant'
 import { ref } from 'vue'
 import { localStorage } from '@/utils/local-storage'
 import { getList, timeposition } from '@/api/count'
@@ -10,13 +11,22 @@ const router = useRouter()
 const userId = ref('')
 const usreInfo = ref({})
 const active = ref(1)
-const getDepartments = async () => {
+const show = ref(false)
+const valueKeywords = ref('')
+
+const getDepartments = async (value) => {
   isLoading.value = true
   const obj = {
-    // userid: 624,
+    stake: value, // 搜索参数
+    // userid: 735,//改这里
     userid: userId.value,
     oldOrNew: active.value,
   }
+  const toast = showLoadingToast({
+    duration: 0, // 持续展示 toast
+    forbidClick: true,
+    message: '数据加载中，请稍后...',
+  })
   const res = await getList(obj)
   localStorage.set('userId', userId)
   isLoading.value = false
@@ -25,6 +35,14 @@ const getDepartments = async () => {
     listData.value = res.data
     localStorage.set('ruleType', ruleType.value)
   }
+  // 清空搜索框
+  valueKeywords.value = ""
+  // show.value = false
+  toast.close()
+}
+// 搜索
+const searchInfo = () => {
+  getDepartments(valueKeywords.value)
 }
 const onClickTab = () => {
   getDepartments()
@@ -125,22 +143,22 @@ onUnmounted(() => {
 
 <template>
   <div class="container">
-    <TopMenu :is-back="false">
-      <van-tabs v-if="ruleType === '1'" v-model:active="active" @click-tab="onClickTab">
-        <van-tab title="历史数据" />
-        <van-tab title="最新数据" />
-      </van-tabs>
-      <van-pull-refresh
-        v-if="listData.length > 0" v-model="isLoading"
-        :style="ruleType === '1' ? 'height: calc(100% - 50px)' : ''" @refresh="getDepartments"
-      >
-        <ListCard
-          v-for="(item, index) in listData" :key="index" :form-data="item"
-          :is-btn="active === 1 && ruleType !== '0'" @click="goInfo(item)" @load="getDepartments"
-        />
-      </van-pull-refresh>
-      <van-empty v-else description="暂无内容" />
-    </TopMenu>
+    <!--    <TopMenu :is-back="false">    </TopMenu> -->
+    <van-tabs v-if="ruleType === '1'" v-model:active="active" @click-tab="onClickTab">
+      <van-tab title="历史数据" />
+      <van-tab title="最新数据" />
+    </van-tabs>
+    <van-search  v-model="valueKeywords" placeholder="请输入桩号（仅数字）" shape="round" inputmode="numeric" @search="searchInfo" />
+    <van-pull-refresh
+      v-if="listData.length > 0" v-model="isLoading"
+      :style="ruleType === '1' ? 'height: calc(100% - 50px)' : ''" @refresh="getDepartments"
+    >
+      <ListCard
+        v-for="(item, index) in listData" :key="index" :form-data="item"
+        :is-btn="active === 1 && ruleType !== '0'" @click="goInfo(item)" @load="getDepartments"
+      />
+    </van-pull-refresh>
+    <van-empty v-else description="暂无内容" />
   </div>
 </template>
 
@@ -158,6 +176,11 @@ onUnmounted(() => {
   .van-pull-refresh {
     height: 100%;
     overflow-y: scroll;
+  }
+  .loadingClass{
+    height: 100vh;
+    position: relative;
+    top:40%
   }
 }
 </style>
