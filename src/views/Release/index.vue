@@ -103,13 +103,14 @@ const deleteImg = (file: any) => {
 }
 
 const uploadFile = async () => {
-  if (countMoney.value === '') {
+  if (countMoney.value === '' && dataInfo.empEvnRescue.status === '8') {
     await showDialog({
       title: '提示',
       message:
         '金额不能为空',
       theme: 'round-button',
     })
+    return
   }
   if (uploadImage.value && uploadImage.value.length) {
     const toast = showLoadingToast({

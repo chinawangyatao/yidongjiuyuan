@@ -14,8 +14,8 @@ export const REQUEST_TOKEN_KEY = 'Access-Token'
 const request = axios.create({
   // API 请求的默认前缀
   // baseURL: process.env.VUE_APP_API_BASE_URL,
-  // baseURL: 'http://140.249.206.14:8182/', // 不需要走代理,走代理报错"正式
-  baseURL: 'http://124.129.136.5:18182', // 测试地址
+  baseURL: 'http://140.249.206.14:8182/', // 不需要走代理,走代理报错"正式
+  // baseURL: 'http://124.129.136.5:18182', // 测试地址
   // baseURL: 'http://192.168.3.73:8182/', // 不需要走代理192.168.3.226
   timeout: 60000, // 请求超时时间
 })
